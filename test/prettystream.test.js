@@ -68,7 +68,20 @@ var simpleRecordWithCircularRef = {
   time:"2012-02-08T22:56:52.856Z",
   v:0};
 simpleRecordWithCircularRef.ref = simpleRecordWithCircularRef;
-
+var requestRecordWithObject = {
+  name:"myservice",
+  pid:123,
+  hostname:"example.com",
+  level:30,
+  msg:"My message",
+  time:"2012-02-08T22:56:52.856Z",
+  v:0,
+  req: {
+    method: 'GET',
+    url: '/',
+    some: { interesting: "info" }
+  }
+};
 var funcFields = {
   name: "myservice",
   pid: 123,
@@ -224,6 +237,17 @@ describe('A PrettyStream', function(){
     prettyStream.write(simpleRecordWithCircularRef);
     prettyStream.end();
   });
+
+  it('should handle extra request objects', function(){
+    var prettyStream = new PrettyStream({useColor: false});
+    var result = prettyStream.formatRecord(requestRecordWithObject);
+    result.should.equal(['[2012-02-08T22:56:52.856Z]  INFO: myservice/123 on example.com: My message',
+      '    GET / HTTP/1.1',
+      '    some: {',
+      '      "interesting": "info"',
+      '    }'].join('\n') + "\n");
+  });
+
 });
 
 
